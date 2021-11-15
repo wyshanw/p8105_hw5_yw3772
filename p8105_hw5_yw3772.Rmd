@@ -1,0 +1,71 @@
+---
+title: "Homework 5"
+output: github_document
+---
+
+```{r, echo = FALSE, message=FALSE}
+library(tidyverse)
+library(purrr)
+```
+
+## Problem 2
+
+List of file names
+```{r}
+file_names = list.files("data/") 
+file_names = paste0("data/",file_names)
+```
+
+
+Iterate over file names
+
+```{r}
+output = map(file_names, read_csv) 
+```
+
+Bind all files
+
+```{r}
+df = bind_rows(c(output[1:20]))
+```
+
+Add variable of arm category and subject id
+```{r}
+df = 
+  df %>% 
+  mutate(
+    arm = c(rep("control",10),rep("experimental",10)),
+    subject_id = c((1:10),(1:10))
+  ) %>% 
+  relocate(arm, subject_id)
+```
+
+Pivot the week variable
+
+```{r}
+df_tidy =
+  df %>% 
+  pivot_longer(
+    week_1:week_8,
+    names_to = "week",
+    names_prefix = "week_", # remove the prefix
+    values_to = "value"
+  ) %>% 
+  view()
+```
+
+
+Make spaghetti plot
+```{r}
+ggplot(data = df_tidy, aes(x = week, y = value, group = subject_id)) +
+  geom_line() +
+  facet_grid(. ~ arm) +
+  stat_smooth(aes(group = 1), method = "lm", se = FALSE) 
+```
+
+For subject in the control group, the trend of observation values did not change much over time, while in the experimental group, the observation values increased over time.
+
+## Problem 3
+
+
+
